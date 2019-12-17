@@ -6,7 +6,9 @@ const defaultState = fromJS({
     enterLoading: true,
     pullUpLoading: false,
     pullDownLoading: false,
-    pageCount: 0
+    pageCount: 0,
+    category: '',
+    alpha: ''
 })
 
 export default (state = defaultState, action) => {
@@ -21,6 +23,10 @@ export default (state = defaultState, action) => {
             return state.set('pullUpLoading', action.data);
         case actionTypes.CHANGE_PULLDOWN_LOADING:
             return state.set('pullDownLoading', action.data);
+        case actionTypes.CHANGE_CATOGORY:
+            return state.set('category', action.data);
+        case actionTypes.CHANGE_ALPHA:
+            return state.set('alpha', action.data);
         default:
             return state;
     }

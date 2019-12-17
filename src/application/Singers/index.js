@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useContext, useState } from 'react'
 import Horizen from '../../baseUI/horizen-item'
 import { categoryTypes, alphaTypes } from '../../api/config';
 import {
@@ -15,20 +15,22 @@ import {
     refreshMoreSingerList,
     changePullUpLoading,
     changePullDownLoading,
-    refreshMoreHotSingerList
+    refreshMoreHotSingerList,
 } from './store/actionCreators';
 import LazyLoad, { forceCheck } from 'react-lazyload';
 import Scroll from '../../components/scroll'
 import { useDispatch, useSelector } from 'react-redux'
 import Loading from '../../baseUI/loading'
-
+import { CategoryDataContext } from './data'
 
 function Singers() {
 
-    const [category, setCategory] = useState('')
-    const [alpha, setAlpha] = useState('')
+    const { data, dispatch } = useContext(CategoryDataContext)
 
-    const data = useSelector(state => ({
+    const { category, alpha } = data.toJS()
+
+
+    const reduxData = useSelector(state => ({
         singerList: state.getIn(['singers', 'singerList']),
         enterLoading: state.getIn(['singers', 'enterLoading']),
         pullDownLoading: state.getIn(['singers', 'pullDownLoading']),
@@ -36,47 +38,55 @@ function Singers() {
         pageCount: state.getIn(['singers', 'pageCount']),
     }))
 
-    const dispatch = useDispatch()
+    const reduxDispatch = useDispatch()
 
-    const { singerList, enterLoading, pullDownLoading, pullUpLoading, pageCount } = data
+    const { singerList, enterLoading, pullDownLoading, pullUpLoading, pageCount } = reduxData
 
     useEffect(() => {
-        dispatch(getHotSingerList())
-    }, [dispatch])
+        if (!singerList.size) {
+            reduxDispatch(getHotSingerList())
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
-    function updateDispatch() {
-        dispatch(changePageCount(0));
-        dispatch(changeEnterLoading(true));
-        dispatch(getSingerList(category, alpha));
-    }
+    useEffect(() => {
+        reduxDispatch(changePageCount(0));
+        reduxDispatch(changeEnterLoading(true));
+        reduxDispatch(getSingerList(category, alpha));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [category, alpha])
 
     function handleUpdateAlpha(val) {
-        setAlpha(val)
-        updateDispatch()
+        dispatch({
+            type: 'CHANGE_ALPHA',
+            data: val === alpha ? '' : val
+        })
     }
 
     function handleUpdateCatetory(val) {
-        setCategory(val)
-        updateDispatch()
+        dispatch({
+            type: 'CAHNGE_CATEGORY',
+            data: val === category ? '' : val
+        })
     }
 
     const handlePullUp = () => {
-        dispatch(changePullUpLoading(true));
-        dispatch(changePageCount(pageCount + 1));
+        reduxDispatch(changePullUpLoading(true));
+        reduxDispatch(changePageCount(pageCount + 1));
         if (category === '') {
-            dispatch(refreshMoreHotSingerList());
+            reduxDispatch(refreshMoreHotSingerList());
         } else {
-            dispatch(refreshMoreSingerList(category, alpha));
+            reduxDispatch(refreshMoreSingerList(category, alpha));
         }
     };
 
     const handlePullDown = () => {
-        dispatch(changePullDownLoading(true));
-        dispatch(changePageCount(0));
+        reduxDispatch(changePullDownLoading(true));
+        reduxDispatch(changePageCount(0));
         if (category === '' && alpha === '') {
-            dispatch(getHotSingerList());
+            reduxDispatch(getHotSingerList());
         } else {
-            dispatch(getSingerList(category, alpha));
+            reduxDispatch(getSingerList(category, alpha));
         }
     };
 
