@@ -11,11 +11,13 @@ import Loading from '../../baseUI/loading'
 function Recommend(props) {
 
     //用redux新特性 useSelector useDispatch来实现
-    const data = useSelector(state => ({
-        bannerList: state.getIn(['recommend', 'bannerList']),
-        recommendList: state.getIn(['recommend', 'recommendList']),
-        enterLoading: state.getIn(['recommend', 'enterLoading']),
-    }))
+    const data = useSelector(state => {
+        return {
+            bannerList: state.getIn(['recommend', 'bannerList']),
+            recommendList: state.getIn(['recommend', 'recommendList']),
+            enterLoading: state.getIn(['recommend', 'enterLoading']),
+        }
+    })
 
     const dispatch = useDispatch()
 
