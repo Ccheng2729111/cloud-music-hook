@@ -5,32 +5,41 @@ import Scroll from '../../components/scroll'
 import { Content } from './style'
 import { useDispatch, useSelector } from 'react-redux'
 import * as actionTypes from './store/actionCreators'
+import { forceCheck } from 'react-lazyload'
+import Loading from '../../baseUI/loading'
 
 function Recommend(props) {
 
     //用redux新特性 useSelector useDispatch来实现
     const data = useSelector(state => ({
         bannerList: state.getIn(['recommend', 'bannerList']),
-        recommendList: state.getIn(['recommend', 'recommendList'])
+        recommendList: state.getIn(['recommend', 'recommendList']),
+        enterLoading: state.getIn(['recommend', 'enterLoading']),
     }))
 
     const dispatch = useDispatch()
 
-    const { bannerList, recommendList } = data;
+    const { bannerList, recommendList, enterLoading } = data;
 
     // const { getBannerDataDispatch, getRecommendListDataDispatch } = props
 
     useEffect(() => {
-        dispatch(actionTypes.getBannerList());
-        dispatch(actionTypes.getRecommendList());
-    }, [dispatch])
+        if (!bannerList.size) {
+            dispatch(actionTypes.getBannerList());
+        }
+
+        if (!recommendList.size) {
+            dispatch(actionTypes.getRecommendList());
+        }
+    }, [bannerList.size, dispatch, recommendList])
 
     const bannerListJS = bannerList ? bannerList.toJS() : []
     const recommendListJS = recommendList ? recommendList.toJS() : []
 
     return (
         <Content>
-            <Scroll>
+            <Scroll onScroll={forceCheck} >
+                {enterLoading ? <Loading /> : null}
                 <div>
                     <Slider bannerList={bannerListJS} />
                     <RecommendList recommendList={recommendListJS} />
